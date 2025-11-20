@@ -39,7 +39,7 @@ export function AppSidebar() {
         <SidebarGroup>
           <div className="p-3">
             <h2 className="font-bold text-lg">Chat</h2> 
-            <p className="text-sm text-gray-40">Sign in to start chating with multiple AI Models</p>
+            <p className="text-sm text-gray-40">Sign in to start chatting with multiple AI Models</p>
           </div>
         </SidebarGroup>
       </SidebarContent>
