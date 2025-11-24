@@ -7,19 +7,18 @@ import { AppSidebar } from './_components/AppSidebar'
 import AppHeader from './_components/AppHeader'
 import { useUser } from '@clerk/nextjs'
 import { db } from '@/config/FirebaseConfig'
-import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
 import { AiSelectedModelContext } from '@/context/AiSelectedModelContext'
 import { DefaultModel } from '@/shared/AiModelsShared'
 import { UserDetailContext } from '@/context/UserDetailsContext'
 
 function Provider({ children, ...props}) {
 
-  // const user = useUser();
-
   const { user, isLoaded, isSignedIn } = useUser();
 
   const [aiSelectedModels, setAiSelectedModels] = useState(DefaultModel)
   const [userDetail, setUserDetail] = useState()
+  const [messages, setMessages] = useState({})
 
   useEffect(() => {
     if (isLoaded && isSignedIn && user?.primaryEmailAddress?.emailAddress) {
@@ -43,7 +42,7 @@ function Provider({ children, ...props}) {
     if (userSnap.exists()){
       console.log('Existing User')
       const userInfo = userSnap.data();
-      setAiSelectedModels(userInfo?.selectedModelPref);
+      setAiSelectedModels(userInfo?.selectedModelPref ?? DefaultModel);
       setUserDetail(userInfo)
       return;
     } else {
@@ -62,6 +61,20 @@ function Provider({ children, ...props}) {
     }
   }
 
+  useEffect(() => {
+    if(aiSelectedModels){
+      // Update to Firebase Databse
+      UpdateAIModelSelection()
+    }
+  }, [aiSelectedModels])
+
+  const UpdateAIModelSelection = async () => {
+    const docRef = doc(db, "users", user?.primaryEmailAddress?.emailAddress);
+    await updateDoc(docRef, {
+      selectedModelPref: aiSelectedModels
+    })
+  }
+
   return (
     <NextThemesProvider 
       attribute="class"
@@ -70,7 +83,7 @@ function Provider({ children, ...props}) {
       disableTransitionOnChange
       {...props}>
       <UserDetailContext.Provider value={{userDetail, setUserDetail}}>
-        <AiSelectedModelContext.Provider value={{aiSelectedModels, setAiSelectedModels}}>
+        <AiSelectedModelContext.Provider value={{aiSelectedModels, setAiSelectedModels, messages, setMessages}}>
           <SidebarProvider>
               <AppSidebar />
               <div className="flex-1 w-full">
