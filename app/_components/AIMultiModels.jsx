@@ -23,6 +23,7 @@ import { db } from '@/config/FirebaseConfig'
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import ReactMarkdown from 'react-markdown'
+import { useSearchParams } from 'next/navigation'
 
 function AIMultiModels() {
 
@@ -30,6 +31,8 @@ function AIMultiModels() {
 
   const [aiMoldelList, setAiModelList] = useState(AIModelList)
   const { aiSelectedModels, setAiSelectedModels, messages, setMessages } = useContext(AiSelectedModelContext)
+
+  
 
   const onToggleChange = (model, value) => {
     setAiModelList((prev) => 
@@ -113,7 +116,7 @@ function AIMultiModels() {
             <div className='flex-1 p-4'>
               <div className='flex-1 p-4 space-y-2'>
                 {messages[model.model]?.map((m,i) => (
-                  <div 
+                  <div key={i}
                     className={`p-2 rounded-md ${m.role=='user' ? 
                       "bg-blue-100 text-blue-900" :
                       "bg-gray-100 text-gray-900"
@@ -125,9 +128,9 @@ function AIMultiModels() {
                     <div className='flex gap-3 items-center'>
                       {m.content == 'loading' &&<> <Loader className='animate-spin'/> <span>Thinking...</span> </>}
                     </div>
-                    {m.content !== 'loading' && 
-                      <ReactMarkdown rehypePlugins={[remarkGfm]}>
-                      {m.content}
+                    {m?.content !== 'loading' && 
+                      m?.content && <ReactMarkdown rehypePlugins={[remarkGfm]}>
+                      {m?.content}
                       </ReactMarkdown>
                     }
                   </div>

@@ -4,11 +4,33 @@ import React, { useContext, useEffect, useState } from 'react'
 import AIMultiModels from './AIMultiModels'
 import { AiSelectedModelContext } from '@/context/AiSelectedModelContext'
 import axios from 'axios'
+import { v4 as uuidv4 } from 'uuid';
+import { doc, getDoc, setDoc } from 'firebase/firestore'
+import { db } from '@/config/FirebaseConfig'
+import { useUser } from '@clerk/nextjs'
+import { useSearchParams } from 'next/navigation'
 
 function ChatInputBox() {
 
-  const [userInput, setUserInput] = useState()
+  const [userInput, setUserInput] = useState("")
   const { aiSelectedModels, setAiSelectedModels, messages, setMessages } = useContext(AiSelectedModelContext)
+  const [chatId, setChatId] = useState()
+  const { user, isLoaded, isSignedIn } = useUser();
+
+  const params = useSearchParams();
+
+
+  useEffect(() => {
+    const chatId_ = params.get('chatId');
+    console.log("This is the chat ID", chatId_)
+    if(chatId_){
+      setChatId(chatId_);
+      GetMessages(chatId_);
+    } else {
+      setMessages([]);
+      setChatId(uuidv4())
+    }
+  }, [params])
 
   const handleSend = async () => {
       if (!userInput.trim()) return;
@@ -22,8 +44,9 @@ function ChatInputBox() {
                   ...(updated[modelKey] ?? []),
                   { role: "user", content: userInput },
               ];
-            } 
-          });
+            }
+          }
+          );
           return updated;
       });
 
@@ -91,11 +114,35 @@ function ChatInputBox() {
   };
 
   useEffect(() => {
-    console.log(messages)
+    if (!chatId) return; 
+    SaveMessages();
   }, [messages])
 
+  const SaveMessages = async () => {
+    if (!chatId) return;
+    if (messages.length == 0) return; // prevent crash
+    const docRef = doc(db, 'chatHistory', chatId);
+
+    const email = user?.primaryEmailAddress?.emailAddress;
+    if (!email) return;
+
+    await setDoc(docRef,{
+      chatId: chatId,
+      userEmail: user?.primaryEmailAddress?.emailAddress,
+      messages: messages,
+      lastUpdated: Date.now()
+    })
+  }
+
+  const GetMessages = async (chatId_) => {
+    const docRef = doc(db, 'chatHistory', chatId_);
+    const docSnap = await getDoc(docRef);
+    const docData = docSnap.data();
+    setMessages(docData.messages)
+  }
+
   return (
-    <div className='relative min-h-screen'>
+    <div className='relative min-h-[80vh] mt-[60px'>
       {/* Page Content */}
       <div>
         <AIMultiModels />
