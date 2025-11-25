@@ -9,6 +9,7 @@ import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { db } from '@/config/FirebaseConfig'
 import { useUser } from '@clerk/nextjs'
 import { useSearchParams } from 'next/navigation'
+import { toast } from 'sonner'
 
 function ChatInputBox() {
 
@@ -34,6 +35,19 @@ function ChatInputBox() {
 
   const handleSend = async () => {
       if (!userInput.trim()) return;
+
+      // Call only user is Free
+      //Deduct and Check Token Limit
+      const result = await axios.post('/api/user-remaining-msg',{
+        token: 1
+      });
+      const remainingToken = result?.data?.remainingToken
+      if(remainingToken <= 0){
+        toast.error("Limit has Exceed, Please subscribe for more tokens or Wait 2 mins")
+        return;
+      } else {
+
+      }
 
       // 1️⃣ Add user message to all enabled models
       setMessages((prev) => {
