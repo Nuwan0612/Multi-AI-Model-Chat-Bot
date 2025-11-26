@@ -18,7 +18,7 @@ import { Loader, Lock, MessageSquare } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { AiSelectedModelContext } from '@/context/AiSelectedModelContext'
 import { doc, updateDoc } from 'firebase/firestore'
-import { useUser } from '@clerk/nextjs'
+import { useAuth, useUser } from '@clerk/nextjs'
 import { db } from '@/config/FirebaseConfig'
 import Markdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -27,10 +27,11 @@ import { useSearchParams } from 'next/navigation'
 
 function AIMultiModels() {
 
-  const { user, isLoaded, isSignedIn } = useUser();
-
   const [aiMoldelList, setAiModelList] = useState(AIModelList)
   const { aiSelectedModels, setAiSelectedModels, messages, setMessages } = useContext(AiSelectedModelContext)
+
+  const { has, isLoaded } = useAuth();
+  const isPaidUser = isLoaded ? has({ plan: 'unlimited_plan' }) : false;
 
   
 
@@ -49,7 +50,7 @@ function AIMultiModels() {
       }))
   }
 
-  console.log(aiSelectedModels)
+  console.log(aiSelectedModels, isPaidUser)
 
   const onSelecteValue = async (parentModel, value) => {
     setAiSelectedModels(prev => ({
@@ -75,7 +76,7 @@ function AIMultiModels() {
                 height={24}
               />
              {model.enable && 
-                <Select defaultValue={aiSelectedModels[model.model].modelId} onValueChange={(value) => onSelecteValue(model.model, value)} disabled={model.premium}>
+                <Select defaultValue={aiSelectedModels[model.model].modelId} onValueChange={(value) => onSelecteValue(model.model, value)} disabled={!isPaidUser && model.premium}>
                   <SelectTrigger className="w-[180px]">
                     <SelectValue placeholder={aiSelectedModels[model.model].modelId} />
                   </SelectTrigger>
@@ -90,7 +91,7 @@ function AIMultiModels() {
                     <SelectGroup className='px-3'>
                       <SelectLabel className={'text-sm text-gray-400'}>Premium</SelectLabel>
                       {model.subModel.map((subModel, index) => subModel.premium == true && (
-                      <SelectItem key={index} value={subModel.name} disabled = {subModel.premium}>{subModel.name} {subModel.premium && <Lock className='h-4 w-4'/>}</SelectItem>
+                      <SelectItem key={index} value={subModel.name} disabled = {!isPaidUser && subModel.premium}>{subModel.name} {!isPaidUser && subModel.premium && <Lock className='h-4 w-4'/>}</SelectItem>
                     ))}
                     </SelectGroup>
                   </SelectContent>
@@ -99,14 +100,16 @@ function AIMultiModels() {
             </div>
             <div>
               {model.enable ? 
-                <Switch checked={model.enable}
+                <Switch 
+                  checked={model.enable}
+                  disabled={!isPaidUser && model.premium}
                   onCheckedChange = {(v) => onToggleChange(model.model, v)}
                 /> :
                 <MessageSquare onClick={() => onToggleChange(model.model, true)}/>
               }
             </div>
           </div>
-          {model.premium && model.enable &&
+          {!isPaidUser && model.premium && model.enable &&
             <div className='flex items-center justify-center h-full'>
               <Button><Lock />Upgrade to unlock</Button>
             </div>
