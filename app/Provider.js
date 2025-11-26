@@ -87,7 +87,7 @@ function Provider({ children, ...props}) {
         <AiSelectedModelContext.Provider value={{aiSelectedModels, setAiSelectedModels, messages, setMessages}}>
           <SidebarProvider>
               <AppSidebar />
-              <div className="flex-1 w-full">
+              <div className='flex flex-col'>
                 <AppHeader />
                 {children}
               </div>
