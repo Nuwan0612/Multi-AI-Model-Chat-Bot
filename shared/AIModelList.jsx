@@ -41,8 +41,9 @@ export default [
     premium: true,
     enable: true,
     subModel: [
-      { name: "Mistral Medium 2505", premium: true, id: "mistral-medium-2505" },
       { name: "Ministral 3B", premium: false, id: "Ministral-3B" },
+      { name: "Mistral Medium 2505", premium: true, id: "mistral-medium-2505" },
+      
     ],
   },
   {
@@ -71,7 +72,7 @@ export default [
     premium: true,
     enable: true,
     subModel: [
-      { name: "Llama 3.3 70B Instruct", premium: true, id: "Llama-3.3-70B-Instruct" },
+      { name: "Llama 3.3 70B Instruct", premium: false, id: "Llama-3.3-70B-Instruct" },
       { name: "Llama 4 Scout 17B 16E Instruct", premium: true, id: "Llama-4-Scout-17B-16E-Instruct" },
     ],
   },

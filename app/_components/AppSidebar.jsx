@@ -8,7 +8,7 @@ import {
   SidebarGroup,
   SidebarHeader,
 } from "@/components/ui/sidebar"
-import { SignInButton, useUser } from "@clerk/nextjs"
+import { SignInButton, useAuth, useUser } from "@clerk/nextjs"
 import { Bolt, Moon, Sun, User2, Zap } from "lucide-react"
 import { useTheme } from "next-themes"
 import Image from "next/image"
@@ -20,6 +20,7 @@ import moment from "moment"
 import Link from "next/link"
 import axios from "axios"
 import { AiSelectedModelContext } from "@/context/AiSelectedModelContext"
+import PricingModel from "./PricingModel"
 
 
 
@@ -29,6 +30,8 @@ export function AppSidebar() {
   const [chatHistory, setChatHistory] = useState([]);
   const { aiSelectedModels, setAiSelectedModels, messages, setMessages } = useContext(AiSelectedModelContext)
   const [freeMsgCount, setFreeMsgCount] = useState()
+
+    const { has } = useAuth()
 
   useEffect(() => {
     user && GetChartHistory();
@@ -137,8 +140,14 @@ export function AppSidebar() {
             </SignInButton>
             :
             <div>
-              <UsageCreditProgress remainingToken = {freeMsgCount}/>
-              <Button className={'w-full mb-3'}> <Zap /> Upgrade Plan </Button>
+              { !has({ plan: 'unlimited_plan' }) &&
+                <div>
+                  <UsageCreditProgress remainingToken = {freeMsgCount}/>
+                  <PricingModel>
+                    <Button className={'w-full mb-3'}> <Zap /> Upgrade Plan </Button>
+                  </PricingModel>
+              </div>
+              }
               <Button className="flex w-full" variant={'ghost'}>
                 <User2 /> <h2>Settings</h2>
               </Button>

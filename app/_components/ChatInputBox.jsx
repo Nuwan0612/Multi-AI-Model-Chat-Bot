@@ -7,7 +7,7 @@ import axios from 'axios'
 import { v4 as uuidv4 } from 'uuid';
 import { doc, getDoc, setDoc } from 'firebase/firestore'
 import { db } from '@/config/FirebaseConfig'
-import { useUser } from '@clerk/nextjs'
+import { useAuth, useUser } from '@clerk/nextjs'
 import { useSearchParams } from 'next/navigation'
 import { toast } from 'sonner'
 
@@ -19,6 +19,8 @@ function ChatInputBox() {
   const { user, isLoaded, isSignedIn } = useUser();
 
   const params = useSearchParams();
+
+  const { has } = useAuth()
 
 
   useEffect(() => {
@@ -34,19 +36,24 @@ function ChatInputBox() {
   }, [params])
 
   const handleSend = async () => {
+    if(!user){
+      alert("Sign in for send Messages")
+      return;
+    }
+
       if (!userInput.trim()) return;
 
-      // Call only user is Free
-      //Deduct and Check Token Limit
-      const result = await axios.post('/api/user-remaining-msg',{
-        token: 1
-      });
-      const remainingToken = result?.data?.remainingToken
-      if(remainingToken <= 0){
-        toast.error("Limit has Exceed, Please subscribe for more tokens or Wait 2 mins")
-        return;
-      } else {
-
+      if(!has({ plan: 'unlimited_plan' })){
+        // Call only user is Free
+        //Deduct and Check Token Limit
+        const result = await axios.post('/api/user-remaining-msg',{
+          token: 1
+        });
+        const remainingToken = result?.data?.remainingToken
+        if(remainingToken <= 0){
+          toast.error("Limit has Exceed, Please subscribe for more tokens or Wait 2 mins")
+          return;
+        } 
       }
 
       // 1️⃣ Add user message to all enabled models
