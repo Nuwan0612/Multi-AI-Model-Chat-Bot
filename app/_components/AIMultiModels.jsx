@@ -67,7 +67,7 @@ function AIMultiModels() {
   return (
     <div className='flex flex-1 h-[75vh] border-b'>
       {aiMoldelList.map((model, index) => (
-        <div key={index} className={`flex flex-col border-r h-full overflow-auto  ${model.enable ? 'flex-1 min-w-[400px]' : 'w-[100px] flex-none'}`}>
+        <div key={index} className={`flex flex-col border-r h-full  ${model.enable ? 'flex-1 min-w-[400px]' : 'w-[100px] flex-none'}`}>
           <div key={index} className='flex w-full h-[70px] items-center justify-between border-b p-4'> 
             <div className='flex items-center gap-4'>
               <Image src={model.icon} 
@@ -81,17 +81,17 @@ function AIMultiModels() {
                     <SelectValue placeholder={aiSelectedModels[model.model].modelId} />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectGroup className='px-3'>
+                    {!model.premium && <SelectGroup className='px-3'>
                       <SelectLabel className={'text-sm text-gray-400'}>Free</SelectLabel>
                       {model.subModel.map((subModel, index) => subModel.premium == false && (
                       <SelectItem key={index} value={subModel.id}>{subModel.name}</SelectItem>
                     ))}
-                    </SelectGroup>
+                    </SelectGroup> }
 
                     <SelectGroup className='px-3'>
                       <SelectLabel className={'text-sm text-gray-400'}>Premium</SelectLabel>
                       {model.subModel.map((subModel, index) => subModel.premium == true && (
-                      <SelectItem key={index} value={subModel.name} disabled = {!isPaidUser && subModel.premium}>{subModel.name} {!isPaidUser && subModel.premium && <Lock className='h-4 w-4'/>}</SelectItem>
+                      <SelectItem key={index} value={subModel.id} disabled = {!isPaidUser && subModel.premium}>{subModel.name} {!isPaidUser && subModel.premium && <Lock className='h-4 w-4'/>}</SelectItem>
                     ))}
                     </SelectGroup>
                   </SelectContent>
@@ -116,7 +116,7 @@ function AIMultiModels() {
           } 
 
           {model.enable &&
-            <div className='flex-1 p-4'>
+            <div className='flex-1 p-4 overflow-auto'>
               <div className='flex-1 p-4 space-y-2'>
                 {messages[model.model]?.map((m,i) => (
                   <div key={i}

@@ -4,7 +4,7 @@ import React from 'react'
 
 function AppHeader() {
   return (
-    <div className="p-3 w-full shadow flex justify-between items-center">
+    <div className="p-3 w-full shadow flex justify-between items-center fixed">
       <SidebarTrigger />
     </div>
   )
